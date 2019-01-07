@@ -1,0 +1,85 @@
+<div class="jumbotron">
+  <h1>Scrape the Times!</h1>
+  <button class="btn">Scrape now</button>
+</div>
+<main class="container">
+  <div class="row">
+    <h2>Articles</h2>
+  </div>
+  {{#each articles}}
+  <div class="row mt-3">
+    <a href={{this.url}} target="_blank">
+      <h4>{{this.title}}</h4>
+    </a>
+    <p>{{this.summary}}</p>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#a{{this._id}}">
+      Comments
+    </button>
+  </div>
+  {{/each}}
+</main>
+
+{{#each articles}}
+<div class="modal fade" id="a{{this._id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Comments on {{this.title}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {{#each this.comments}}
+        <div class="row">
+          <div class="col-11">
+          <p>{{this.username}} says...</p>
+          </div>
+          <div class="col-1">
+            <span style="color:red" class="delete" id="{{this._id}}">&times;</span>
+          </div>
+          </div>
+        <div class="row"><p>{{this.body}}</p></div>
+        <hr/>
+        {{/each}}
+        <form method="POST" class="commentform" id="{{this._id}}">
+          <p>Add your comment</p>
+          <label for="username">Name</label>
+          <input type="text" id="username">
+          <label for="body">Comment</label>
+          <input type="text" id="body">
+          <button class="btn btn-primary" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{/each}}
+
+<script>
+  $(".commentform").on("submit", function(event) {
+    event.preventDefault();
+    console.log($("#username").val(), $("#body").val());
+    $.ajax({
+      url: "/api/notes/"+this.id,
+      method: "POST",
+      data: {
+        username: $("#username").val(),
+        body: $("#body").val()
+      }
+    }).then(function(res) {
+      console.log(res);
+    })
+  });
+  $(".delete").on("click", function(event) {
+    event.preventDefault();
+    $.ajax({
+      url:"/api/notes/" + this.id,
+      method: "DELETE"
+    }).then(function(res) {
+      console.log(res);
+    });
+  });
+</script>
